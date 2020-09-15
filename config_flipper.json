@@ -1,11 +1,11 @@
 {
 	"dssp":{
-		"dssp_mkfile": "ext_bin/dssp-2.2.1/mkdssp"
+		"dssp_mkfile": "/projects/biodb/disorder/ext_bin/dssp-2.2.1/mkdssp"
 	},
 
 	"finder":{
-		"models_dir_path": "models/",
-		"trained_model_path": "models/trained_model.sav",
+		"models_dir_path": "/projects/biodb/disorder/models/",
+		"trained_model_path": "/projects/biodb/disorder/models/trained_model.sav",
 
 		"max_tree_depth": null,
 		"trees_number": 20,
