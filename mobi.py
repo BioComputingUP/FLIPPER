@@ -115,6 +115,7 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
     psi = []
     ss = []
     distance_ca = []  # Higher numbers correspond to closer atoms !!!
+    data = []  # just for printing
 
     ppb = PPBuilder(10.0)  # Build the chains allowing for "holes" of max 10 A
 
@@ -145,7 +146,7 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
                 # Structural alignment (TM-align) all against first model
                 if i > first_model:
 
-                    command = '{} {} {} -o {}_tmscore'.format(config_params.get('tm_score'), chain_models[first_model][1], model_file, model_file)
+                    command = '{} {} {} -o {}_tmscore'.format(config_params.get('tm_score'), model_file, chain_models[first_model][1], model_file)
                     logging.debug("{} alignment command: {}".format(pdb_id, command))
                     try:
                         subprocess.check_output(shlex.split(command))
@@ -180,6 +181,7 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
                         # Distances are calculated only from second model
                         if i > first_model:
                             tmp_dist = 1.0 / (1.0 + pow((ca - ca_list_ref[j]) / config_params.getfloat('mobi_d_0'), 2.0))
+                            # print(j, ca - ca_list_ref[j], pow((ca - ca_list_ref[j]) / config_params.getfloat('mobi_d_0'), 2.0), tmp_dist, ca.get_vector(), ca_list_ref[j].get_vector())
                             distance_ca.append(tmp_dist)
 
                 if len(ca_list_ref) != len(phi_psi_list):
@@ -203,14 +205,20 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
     if phi:
         phi = np.asarray(phi).reshape((-1, len(ca_list_ref)))
         phi_state = np.std(phi, axis=0)  # STD by column
+        data.append(("phi_std", phi_state))
         phi_state = phi_state > config_params.getfloat('mobi_phi')
 
     if psi:
         psi = np.asarray(psi).reshape((-1, len(ca_list_ref)))
         psi_state = np.std(psi, axis=0)  # STD by column
+        data.append(("psi_std", psi_state))
         psi_state = psi_state > config_params.getfloat('mobi_psi')
 
+
     ss = np.asarray(ss, dtype="str").reshape((-1, len(ca_list_ref)))
+    # Print the secondary structure for each position and each model
+    # logging.debug("dssp_out {} {} {}".format(pdb_id, chain_id, ";".join(["{}{},{}".format(r[0], r[1], "".join(s)) for r, s in zip(residues, ss.T)])))
+
     distance_ca = np.asarray(distance_ca).reshape((-1, len(ca_list_ref)))
 
     logging.debug(distance_ca)
@@ -220,14 +228,18 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
 
     # Standard deviation of MOBI distances by column
     distance_std_state = np.std(distance_ca, axis=0)
+    data.append(("distance_STD", distance_std_state))
     distance_std_state = distance_std_state > config_params.getfloat('mobi_d_std')
+    data.append(("distance_STD_state", distance_std_state))
 
     # Average Scaled Distance. Represents closeness in reality
     mobile_score = np.mean(distance_ca, axis=0)
+    data.append(("distance_mean", mobile_score))
 
     # Set mobile state
     mobile_str = copy.copy(mobile_score)
     mobile_str = mobile_str < config_params.getfloat('mobi_d_mean')
+    data.append(("distance_mean_state", mobile_str))
 
     # Calculate disorder pattern from secondary structure
     # Transform the matrix in 1/0 by comparing with the first model
@@ -235,9 +247,11 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
 
     # If secondary structure is not constant, or is constant but ss is "S" or "-" , than disorder (True)
     ss_state = np.logical_or(~ss_state.all(axis=0), np.any(np.isin(ss, ['S', '-']), axis=0))
+    data.append(("ss_state", ss_state))
 
     # Filter by SS assignment
     mobile_str[~ss_state] = False
+    data.append(("distance_mean_state_ss", mobile_str))
 
     # Filter for patterns
     mobi_patterns = [('1011', '1111'), ('1101', '1111'), ('10011', '11111'), ('11001', '11111'),
@@ -245,6 +259,7 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
     mobile_str = "".join(map(str, mobile_str.astype(int)))
     for ori, rep in mobi_patterns:
         mobile_str = mobile_str.replace(ori, rep)
+    data.append(("distance_mean_pattern", mobile_str))
 
     # Further filtering for patterns
     for pattern in ['110', '011']:
@@ -258,9 +273,14 @@ def get_mobi(pdb_id, chain_id, chain_models, config_params):
                 if phi_state is not None and psi_state is not None and \
                         phi_state[pos] and psi_state[pos] and distance_std_state[pos] and psi_state[pos+1]:
                     mobile_str = mobile_str[0:pos] + '111' + mobile_str[pos+3:]
+    data.append(("mobi_state", mobile_str))
 
     mobile_score = 1 - mobile_score  # Transform the distance into a score (high score high disorder)
+    data.append(("mobi_score", mobile_score))
 
     logging.debug("ss_state: {}\nmobile score: {}\nmobile state: {}".format(ss_state, mobile_score, mobile_str))
+
+    # for k, a in data:
+    #     print(k, list(a))
 
     return mobile_score, mobile_str

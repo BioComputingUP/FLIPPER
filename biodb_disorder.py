@@ -313,6 +313,10 @@ def parse_args():
                         help="The log level")
     parser.add_argument("--production", action='store_true', default=False,
                         help="Activate the production section in the configuration file")
+
+    parser.add_argument("--keep_tmp_file", action='store_true', default=False,
+                        help="Don't remove temporary files")
+
     return parser.parse_args()
 
 
@@ -357,7 +361,8 @@ if __name__ == "__main__":
                  config_flipper)
 
     # Clean temporary files when completing
-    shutil.rmtree(tmp_dir)
+    if not args.keep_tmp_file:
+        shutil.rmtree(tmp_dir)
 
 
     # Examples of problematic PDBs

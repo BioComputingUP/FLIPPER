@@ -138,18 +138,18 @@ class LipsFinder:
 					extracted_pdb_y[chain.id_label][res_index] = extracted_residue_y
 		# return extraction
 		"""
-		Features (extracted_pdb_X)
-		0 inter contacts (window average)
-		1 intra long range contacts (window average)
-		2 helix
-		3 beta
-		4 non-ss
-		5 rsa
-		6 delta-rsa
+		Features (extracted_residue_X)
+		0 inter contacts (window neighbors_window)
+		1 intra long range contacts (window neighbors_window)
+		2 helix (window neighbors_window)
+		3 beta (window neighbors_window)
+		4 non-ss (window neighbors_window)
+		5 rsa (window asa_ss_window)
+		6 delta-rsa (window asa_ss_window)
 		7 inter contacts
 		8 long range contacts
-		9 distance_3D (linearity)
-		10 length cutoff
+		9 distance_3D (window linearity_window)
+		10 length cutoff (cap chain_length_limit)
 		"""
 		return extracted_pdb_X, extracted_pdb_y
 
