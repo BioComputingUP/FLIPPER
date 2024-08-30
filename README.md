@@ -1,8 +1,8 @@
 FLIPPER, Fast Linear Interacting Peptides Predictor
 ==============================================
-Damiano Piovesan, Paolo Bonato and Silvio C.E. Tosatto
+Damiano Piovesan, Paolo Bonato, Ivan Mičetić and Silvio C.E. Tosatto
 
-Version 1.1
+Version 2.0
 
 Introduction
 ------------
@@ -35,9 +35,6 @@ Monzon AM, Bonato P, Necci M, Tosatto SCE, Piovesan D. \
 Requirements
 ------------
 * Python 3
-* TM-score. Please use the C++ version (https://zhanglab.ccmb.med.umich.edu/TM-score/TMscore.cpp). 
-This important as other versions generate a different output format
-* DSSP 2.2.1 (ftp://ftp.cmbi.ru.nl/pub/software/dssp/dssp-2.2.1.tgz). The version matters as the output format change
 
 Usage
 -----
@@ -46,15 +43,14 @@ The following command prints the help page on screen:
     python3 biodb_disorder.py -h
 
 
-By default, FLIPPER searches the ``ext_bin/`` folder (that includes TM-score and DSSP
-executables) in its own directory. So, FLIPPER can be executed by just
+FLIPPER can be executed by just
 providing the PDB input and the output file:
 
     python3 biodb_disorder.py pdb2zps.ent.gz 2zps.mjson.gz
 
 Configuration
 -------------
-Check config.ini and config_flipper.json for correct paths to executables. 
+Check config.ini and config_flipper.json for correct paths to models.
 Provide absolute paths. 
 
 Output
