@@ -1,0 +1,23 @@
+{
+	"finder":{
+		"models_dir_path": "models",
+		"trained_model_path": "models/trained_model.sav",
+
+		"max_tree_depth": null,
+		"trees_number": 20,
+		"min_samples_leaf": 9,
+
+		"neighbors_range": 3.8,
+		"long_short_threshold": 7,
+		"open_gap_threshold": 6,
+		"chain_length_limit": 100,
+		"neighbors_window": 5,
+		"asa_ss_window": 20,
+		"linearity_window": 20
+	},
+
+	"proba": true,
+	"blur": 0,
+	"proba_threshold": 0.5,
+	"gap_fill": 4 
+}
